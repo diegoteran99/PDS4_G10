@@ -1,9 +1,8 @@
 #https://api.telegram.org/bot5662866930:AAEhXzJuXycvDthZMj4SyP43t__ch6EdqI4/getUpdates
 #https://api.telegram.org/bot5662866930:AAEhXzJuXycvDthZMj4SyP43t__ch6EdqI4/sendMessage?text=hifromBot&chat_id=5633096037
-
+#https://www.youtube.com/watch?v=VcwuWzFcjQI
 from calendar import day_abbr
 from time import time
-from telegram.ext import Updater
 token='5662866930:AAEhXzJuXycvDthZMj4SyP43t__ch6EdqI4'
 
 import requests
@@ -55,12 +54,12 @@ def echo_all(updates):
             today += 1
 
         elif last_chat_text.lower() in greetings and today == now.day and 12 <= hour < 17:
-            text = 'Good Afternoon  {}'.format(last_chat_name);
+            text = 'Good Afternoon  {}'.format(last_chat_name)
             send_telegram_message(text, last_chat_id)
             today += 1
 
         elif last_chat_text.lower() in greetings and today == now.day and 17 <= hour < 23:
-            text = 'Good Evening  {}'.format(last_chat_name);
+            text = 'Good Evening  {}'.format(last_chat_name)
             send_telegram_message(text, last_chat_id)
             today += 1
 
