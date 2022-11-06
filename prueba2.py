@@ -3,8 +3,7 @@
 import random
 import telebot
 
-bot = telebot.TeleBot("5662866930:AAEhXzJuXycvDthZMj4SyP43t__ch6EdqI4", parse_mode=None)
-
+bot = telebot.TeleBot("5662866930:AAEhXzJuXycvDthZMj4SyP43t__ch6EdqI4")
 
 numbers = dict()
 

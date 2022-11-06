@@ -4,19 +4,19 @@
 
 from calendar import day_abbr
 from time import time
-token='5662866930:AAEhXzJuXycvDthZMj4SyP43t__ch6EdqI4'
+token = '5662866930:AAEhXzJuXycvDthZMj4SyP43t__ch6EdqI4'
 
 import requests
 import datetime
 import json
 import time
 import urllib
+import random
 
 TOKEN = token
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 def get_json_from_url(url):
-    #content = get_telegram_url(url)
     response = requests.get(url)
     content = response.content.decode("utf8")
     js = json.loads(content)
@@ -48,20 +48,26 @@ def echo_all(updates):
         print(last_chat_text)
         print(last_chat_name)
 
-        if last_chat_text.lower() in greetings and today == now.day and 6 <= hour < 12:
-            text = 'Good Morning  {}'.format(last_chat_name)
-            send_telegram_message(text, last_chat_id)
-            today += 1
+        if last_chat_text.lower().startswith("/new_number"):
+                max_number = int(last_chat_text.lower().split(" ")[1])
+                tries = int(last_chat_text.lower().split(" ")[2])
+                random_number = random.randint(0, max_number)
+                text = 'Una partida de number ha sido creada\n - numero mayor: {}\n - numero de intentos por persona: {}'.format(max_number, tries)
+                send_telegram_message(text, last_chat_id)
+ 
+        if last_chat_text.lower().startswith("/number"):
+                trying_number = int(last_chat_text.lower().split(" ")[1])
+                if trying_number == random_number:
+                    text = 'Correcto!'
+                    send_telegram_message(text, last_chat_id)
+                else:
+                    if trying_number > random_number:
+                        text = 'El número es menor'
+                        send_telegram_message(text, last_chat_id)
+                    else:
+                        text = 'El número es mayor'
+                        send_telegram_message(text, last_chat_id)
 
-        elif last_chat_text.lower() in greetings and today == now.day and 12 <= hour < 17:
-            text = 'Good Afternoon  {}'.format(last_chat_name)
-            send_telegram_message(text, last_chat_id)
-            today += 1
-
-        elif last_chat_text.lower() in greetings and today == now.day and 17 <= hour < 23:
-            text = 'Good Evening  {}'.format(last_chat_name)
-            send_telegram_message(text, last_chat_id)
-            today += 1
 
         text = "this is a telegram bot - replying back to your message: " + update["message"]["text"]
         print(text)
@@ -79,7 +85,6 @@ def get_last_chat_id_and_text(updates):
 def send_telegram_message(text, chat_id):
     text = urllib.parse.quote_plus(text)
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
-    #get_telegram_url(url)
     response = requests.get(url)
     content = response.content.decode("utf8")
 
