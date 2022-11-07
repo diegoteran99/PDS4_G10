@@ -22,7 +22,7 @@ def guess_number(message):
         max_number = int(message.text.split(" ")[1])
         global tries
         tries = int(message.text.split(" ")[2])
-        bot.send_message(message.chat.id, "Starting new game. You have {} tries to guess the secret number\nUse the /number command before the number you want to try".format(tries))
+        bot.send_message(message.chat.id, "Starting new game\n\nEach user has {} tries to guess a secret number from 0 to {}\nUse the /number command before the number you want to try".format(tries, max_number))
         numbers[message.chat.id] = random.randint(0, max_number)
     else:
         bot.send_message(message.chat.id, "A game is alreday active")
