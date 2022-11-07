@@ -22,7 +22,7 @@ def guess_number(message):
         max_number = int(message.text.split(" ")[1])
         global tries
         tries = int(message.text.split(" ")[2])
-        bot.send_message(message.chat.id, "Starting new game\nUse the /number command before the number you want to try")
+        bot.send_message(message.chat.id, "Starting new game. You have {} tries to guess the secret number\nUse the /number command before the number you want to try".format(tries))
         numbers[message.chat.id] = random.randint(0, max_number)
     else:
         bot.send_message(message.chat.id, "A game is alreday active")
@@ -60,9 +60,9 @@ def checking(message):
                 user_message = int(message.text.split(" ")[1])
                 #print("Number we want to guess: ", numbers[message.chat.id])
                 if user_message > numbers[message.chat.id]:
-                    bot.reply_to(message, "That number is greater than the secret number")
+                    bot.reply_to(message, "That number is greater than the secret number\nYou have {} tries left".format(users[message.from_user.id]["tries"]))
                 elif user_message < numbers[message.chat.id]:
-                    bot.reply_to(message, "That number is smaller than the secret number")
+                    bot.reply_to(message, "That number is smaller than the secret number\nYou have {} tries left".format(users[message.from_user.id]["tries"]))
                 else:
                     bot.reply_to(message, "That's the secret number\nThe winner is {}".format(message.from_user.first_name + " " + message.from_user.last_name ))
                     wins[message.from_user.id]["wins"] += 1
