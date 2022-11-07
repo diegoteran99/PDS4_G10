@@ -47,7 +47,6 @@ def echo_all(updates):
         hour = now.hour
         print(last_chat_text)
         print(last_chat_name)
-
         if last_chat_text.lower().startswith("/new_number"):
                 max_number = int(last_chat_text.lower().split(" ")[1])
                 tries = int(last_chat_text.lower().split(" ")[2])
