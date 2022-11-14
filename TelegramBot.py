@@ -19,7 +19,7 @@ base_url = "https://the-trivia-api.com/"
 
 @bot.message_handler(commands=['start', 'help', 'greetings'])
 def greetings(message):
-    bot.send_message(message.chat.id, "COMMANDS\n\n- /new_number <max_number> <tries> → Start a new number game (ex: /new_number 70 3)\n\n- /stats → Get all the wins of the users\n\n- /number <number>→ Select the number that you want to use (ex: /number 14)")
+    bot.send_message(message.chat.id, "COMMANDS\n\n- /new_number <max_number> <tries> → Start a new number game (ex: /new_number 70 3)\n\n- /stats → Get all the wins of the users\n\n- /number <number>→ Select the number that you want to use (ex: /number 14)\n\n- /trivia_first <number of questions>→Start a trivia game in \"first\" mode(ex: /trivia_first 5)")
 
 @bot.message_handler(commands=['new_number'])
 def guess_number(message):
