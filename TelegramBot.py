@@ -106,15 +106,44 @@ def play_game(message):
             msg = bot.send_message(message.chat.id, "Wrong option")
             bot.register_next_step_handler(msg, play_game)
     else:
-        bot.send_message(message.chat.id, "The game has ended, the winner is ...")
-        text = ""
-        for i in trivia_first_points:
-            text+=""
-            
-        #decir que termino y mostrar el ganador 
+        winners = []
+        highest_value = 0
+        for user_id in trivia_first_points:
+            if trivia_first_points[user_id]["points"] > highest_value:
+                winners = [user_id]
+                highest_value = trivia_first_points[user_id]["points"]
+
+            elif trivia_first_points[user_id]["points"] == highest_value:
+                winners.append(user_id)
+        
+        if len(winners) > 1:
+            text = "The winners are:\n\n"
+            for i in winners:
+                text+="{}\n".format(trivia_first_points[i]["first_name"]+ " "+trivia_first_points[i]["last_name"])
+            text+="\nWith a total of {} points".format(trivia_first_points[winners[0]]["points"])
+        else:
+            text = "The winners is:\n\n{}\n\nWith a total of {} points".format(trivia_first_points[winners[0]]["first_name"]+ " "+trivia_first_points[winners[0]]["last_name"],trivia_first_points[winners[0]]["points"])
+        bot.send_message(message.chat.id, text)
+        trivia_first_points.clear()
+        for i in winners: 
+            wins[i]["wins"] += 1
+    markup = ReplyKeyboardRemove()
+
+        
     
 
 def check_answer(message):
+    if message.from_user.id not in trivia_first_points:
+        trivia_first_points[message.from_user.id] = {
+                "first_name": message.from_user.first_name ,
+                "last_name": message.from_user.last_name,
+                "points":0}
+    if message.from_user.id not in wins:
+            wins[message.from_user.id] = {
+                    "first_name": message.from_user.first_name ,
+                    "last_name": message.from_user.last_name,
+                    "wins":0}
+
     print("check_answer")
     global current_question
     global markup
@@ -133,12 +162,21 @@ def check_answer(message):
     if answer == data[current_question]["correctAnswer"]:
         bot.reply_to(message, "Thats the right answer")
         current_question += 1
-        trivia_first_points[message.from_user.id] += 1
+     
+        trivia_first_points[message.from_user.id]["first_name"] = message.from_user.first_name
+        trivia_first_points[message.from_user.id]["last_name"] = message.from_user.last_name
+        trivia_first_points[message.from_user.id]["points"] += 1
+
         markup = ReplyKeyboardRemove()
         markup = ReplyKeyboardMarkup(
             one_time_keyboard=True, 
             row_width = 1, 
             resize_keyboard=True)
+        text = ""
+        for i in trivia_first_points:
+            text+="{} → {} points\n".format(trivia_first_points[i]["first_name"]+ " "+trivia_first_points[i]["last_name"],trivia_first_points[i]["points"])
+        bot.send_message(message.chat.id, text)
+            
         if int(current_question) != int(cant_preguntas):
             markup.add("Next")
             msg = bot.send_message(message.chat.id, "Ready for next question?",reply_markup=markup )
