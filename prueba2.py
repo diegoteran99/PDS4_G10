@@ -81,7 +81,6 @@ def play_game(message):
             print("playgame")
             print("current_question: ",current_question)
             print("correcct answer: ",data[current_question]["correctAnswer"])
-            global alternativas
             alternativas = []
             alternativas.append(data[current_question]["correctAnswer"])
             for i in data[current_question]["incorrectAnswers"]:
@@ -90,16 +89,12 @@ def play_game(message):
             random.shuffle(alternativas)
             markup = ReplyKeyboardMarkup(
                 one_time_keyboard=True, 
-                row_width = 2, 
+                row_width = 1, 
                 input_field_placeholder="Select your answer", 
-                resize_keyboard=False)
+                resize_keyboard=True)
             
-            markup.add("A","B","C","D")
-            msg = bot.send_message(message.chat.id,
-
-            "QUESTION {}/{}\n{}\n\nA) {}\nB) {}\nC) {}\nD) {}\n".format(current_question+1,cant_preguntas,data[current_question]["question"],alternativas[0], alternativas[1], alternativas[2], alternativas[3])
-            
-            , reply_markup=markup )
+            markup.add(alternativas[0], alternativas[1], alternativas[2], alternativas[3])
+            msg = bot.send_message(message.chat.id, data[current_question]["question"], reply_markup=markup )
             bot.register_next_step_handler(msg, check_answer)
         else:
             msg = bot.send_message(message.chat.id, "Wrong option")
@@ -113,34 +108,20 @@ def check_answer(message):
     print("check_answer")
     global current_question
     global markup
-    global alternativas
     print("message.text: ", message.text)
     print("data[current_question][correctAnswer]: ", data[current_question]["correctAnswer"])
-    if message.text == "A":
-        answer = alternativas[0]
-    elif message.text == "B":
-        answer = alternativas[1]
-    elif message.text == "C":
-        answer = alternativas[2]
-    elif message.text == "D":
-        answer = alternativas[3]
-
-    if answer == data[current_question]["correctAnswer"]:
+    if message.text == data[current_question]["correctAnswer"]:
         bot.reply_to(message, "Thats the right answer")
         current_question += 1
         markup = ReplyKeyboardRemove()
         markup = ReplyKeyboardMarkup(
             one_time_keyboard=True, 
             row_width = 1, 
-            resize_keyboard=True)
-        if int(current_question) != int(cant_preguntas):
-            markup.add("Next")
-            msg = bot.send_message(message.chat.id, "Ready for next question?",reply_markup=markup )
-            bot.register_next_step_handler(msg, play_game)
-        else:
-            markup.add("End Game")
-            msg = bot.send_message(message.chat.id, "No more questions left",reply_markup=markup )
-            bot.register_next_step_handler(msg, play_game)
+            resize_keyboard=False)
+        
+        markup.add("Next")
+        msg = bot.send_message(message.chat.id, "Ready for next question?",reply_markup=markup )
+        bot.register_next_step_handler(msg, play_game)
     else:
         msg = bot.send_message(message.chat.id, "Thats not the right answer, keep trying!",reply_markup=markup )
         bot.register_next_step_handler(msg, check_answer)
