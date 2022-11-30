@@ -1,5 +1,5 @@
-#https://stackoverflow.com/questions/70022749/telegram-guess-the-number-bot-is-changing-the-secret-number-every-time-it-reci
-
+import requests
+import time 
 import random
 import telebot
 from telebot.types import Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
@@ -12,17 +12,11 @@ wins = dict()
 trivia_first_points = dict()
 trivia_time_points = dict()
 
-import requests
-import time 
+
 global initial_time
 global current_time
 
-
-
-
 base_url = "https://the-trivia-api.com/"
-
-
 
 @bot.message_handler(commands=['start', 'help', 'greetings', 'commands'])
 def greetings(message):
@@ -35,6 +29,7 @@ def guess_number(message):
     if len(message.text.split(" ")) == 3:
         if on_game == False:
             on_game = True
+            global max_number
             max_number = int(message.text.split(" ")[1])
             global tries
             tries = int(message.text.split(" ")[2])
@@ -57,10 +52,12 @@ def guess_number(message):
         bot.reply_to(message, "The comand is not correct.\nIt has to be with the form /new_number <max_number> <tries>")
 
 
-
 @bot.message_handler(commands=['number'])
 def checking(message):
-    if len(message.text.split(" ")) == 2:
+    valid_number = True
+    if int(message.text.split(" ")[1]) < 0 or int(message.text.split(" ")[1]) > max_number:
+            valid_number = False
+    if valid_number and len(message.text.split(" ")) == 2:
         global on_game
         global tries
         if on_game == True:
@@ -112,7 +109,6 @@ def checking(message):
             bot.send_message(message.chat.id, "There's no number to guess! Create another game")
     else:
         bot.reply_to(message, "The comand is not correct.\nIt has to be with the form /number <number>")
-
         
 
 @bot.message_handler(commands=['stats'])
@@ -150,7 +146,6 @@ def create_game(message):
             bot.send_message(message.chat.id, "A game is already active, finish that one first")
     else:
         bot.reply_to(message, "The comand is not correct.\nIt has to be with the form /trivia_first <number of questions>")
-
 
 def play_game(message):
     global markup
@@ -222,13 +217,13 @@ def check_answer(message):
     global current_question
     global markup
     global alternativas
-    if message.text == "A":
+    if message.text == "A)":
         answer = alternativas[0]
-    elif message.text == "B":
+    elif message.text == "B)":
         answer = alternativas[1]
-    elif message.text == "C":
+    elif message.text == "C)":
         answer = alternativas[2]
-    elif message.text == "D":
+    elif message.text == "D)":
         answer = alternativas[3]
 
     if answer == data[current_question]["correctAnswer"]:
@@ -250,11 +245,11 @@ def check_answer(message):
         bot.send_message(message.chat.id, text)
             
         if int(current_question) != int(cant_preguntas):
-            markup.add("Next")
+            markup.add("/Next")
             msg = bot.send_message(message.chat.id, "Ready for next question?",reply_markup=markup )
             bot.register_next_step_handler(msg, play_game)
         else:
-            markup.add("End Game")
+            markup.add("/End Game")
             msg = bot.send_message(message.chat.id, "No more questions left",reply_markup=markup )
             bot.register_next_step_handler(msg, play_game)
     else:
@@ -306,10 +301,15 @@ def create_code(message):
         bot.reply_to(message, "The comand is not correct.\nIt has to be with the form /new_code <code_length> <tries>")
 
 
-
 @bot.message_handler(commands=['guess_code'])
 def check_code(message):
-    if len(message.text.split(" ")) == 2:
+    valid_code = True
+    for i in message.text.split(" ")[1]:
+        if int(i) < 0 and int(i) > 5:
+            valid_code = False
+        if message.text.split(" ")[1].count(i) > 1:
+            valid_code = False
+    if valid_code and len(message.text.split(" ")) == 2 :
         global on_game
         global tries
         global code
@@ -369,8 +369,6 @@ def check_code(message):
                             bot.reply_to(message, "You have: \n   {} numbers in the correct position \n   {} numbers that are correct but not in the right position".format(correct, present))
                             bot.send_message(message.chat.id, "Game Over, the secret code was: {}".format(code))
                             users.clear()
-
-
             except ValueError:
                 bot.send_message(message.chat.id, "You must enter an integer")
             except (TypeError, KeyError):
@@ -378,8 +376,7 @@ def check_code(message):
         else:
             bot.send_message(message.chat.id, "There's no code to guess! Create another game")
     else:
-        bot.reply_to(message, "The comand is not correct.\nIt has to be with the form /guess_code <code>")
-
+        bot.reply_to(message, "The comand is not correct.\nIt has to be with the form /guess_code <code> and numbers between 0 and 5")
 
 
 @bot.message_handler(commands=['trivia_time'])
@@ -402,7 +399,7 @@ def create_game_time(message):
                 row_width = 1, 
                 resize_keyboard=True)
             
-            markup.add("Play")
+            markup.add("/Play")
             msg = bot.send_message(message.chat.id, "Game started, total questions: {}\nSay \"Play\" to start the game".format(cant_preguntas),reply_markup=markup )
             bot.register_next_step_handler(msg, play_game_time)
         else:
@@ -410,19 +407,16 @@ def create_game_time(message):
     else:
         bot.reply_to(message, "The comand is not correct.\nIt has to be with the form /trivia_time <number of questions> <seconds to answer>")
 
-
 def play_game_time(message):
     global markup
     global on_game
-    global current_question
     global initial_time
 
     markup = ReplyKeyboardRemove()
     if int(current_question) != int(cant_preguntas):
-        if message.text == "Play" or message.text == "Next":
-            initial_time = time.time()
-            print("initial_time: ", initial_time)
+        if message.text == "/Play" or message.text == "/Next":
             print("correcct answer: ",data[current_question]["correctAnswer"])
+            initial_time = time.time()
             global alternativas
             alternativas = []
             alternativas.append(data[current_question]["correctAnswer"])
@@ -436,7 +430,7 @@ def play_game_time(message):
                 input_field_placeholder="Select your answer", 
                 resize_keyboard=False)
             
-            markup.add("A","B","C","D")
+            markup.add("A)","B)","C)","D)")
 
             msg = bot.send_message(message.chat.id,
 
@@ -476,10 +470,11 @@ def play_game_time(message):
 
 def check_answer_time(message):
     global markup
+    global current_question
     current_time = time.time()
     print("current_time: ", current_time)
     print("time_passed: ", round(current_time - initial_time,1))
-
+    print("correcct answer: ",data[current_question]["correctAnswer"])
     if message.from_user.id not in trivia_time_points:
             trivia_time_points[message.from_user.id] = {
                     "first_name": message.from_user.first_name ,
@@ -492,15 +487,14 @@ def check_answer_time(message):
                     "wins":0}
 
     if current_time - initial_time < float(tiempo_juego):
-        global current_question
         global alternativas
-        if message.text == "A":
+        if message.text == "A)":
             answer = alternativas[0]
-        elif message.text == "B":
+        elif message.text == "B)":
             answer = alternativas[1]
-        elif message.text == "C":
+        elif message.text == "C)":
             answer = alternativas[2]
-        elif message.text == "D":
+        elif message.text == "D)":
             answer = alternativas[3]
 
         if answer == data[current_question]["correctAnswer"]:
@@ -520,15 +514,14 @@ def check_answer_time(message):
             for i in trivia_time_points:
                 text+="{} → {} points\n".format(trivia_time_points[i]["first_name"]+ " "+trivia_time_points[i]["last_name"],trivia_time_points[i]["points"])
             bot.send_message(message.chat.id, text)
-            if current_time - initial_time >= float(tiempo_juego): 
-                if int(current_question) != int(cant_preguntas):
-                    markup.add("Next")
-                    msg = bot.send_message(message.chat.id, "Ready for next question?",reply_markup=markup )
-                    bot.register_next_step_handler(msg, play_game_time)
-                else:
-                    markup.add("End Game")
-                    msg = bot.send_message(message.chat.id, "No more questions left",reply_markup=markup )
-                    bot.register_next_step_handler(msg, play_game_time)
+            if int(current_question) != int(cant_preguntas):
+                markup.add("/Next")
+                msg = bot.send_message(message.chat.id, "Ready for next question?",reply_markup=markup )
+                bot.register_next_step_handler(msg, play_game_time)
+            else:
+                markup.add("/End Game")
+                msg = bot.send_message(message.chat.id, "No more questions left",reply_markup=markup )
+                bot.register_next_step_handler(msg, play_game_time)
         else:
             msg = bot.send_message(message.chat.id, "Thats not the right answer, keep trying!",reply_markup=markup )
             bot.register_next_step_handler(msg, check_answer_time)
@@ -546,13 +539,12 @@ def check_answer_time(message):
         bot.send_message(message.chat.id, text)
             
         if int(current_question) != int(cant_preguntas):
-            markup.add("Next")
+            markup.add("/Next")
             msg = bot.send_message(message.chat.id, "Ready for next question?",reply_markup=markup )
             bot.register_next_step_handler(msg, play_game_time)
         else:
-            markup.add("End Game")
+            markup.add("/End Game")
             msg = bot.send_message(message.chat.id, "No more questions left",reply_markup=markup )
             bot.register_next_step_handler(msg, play_game_time)
      
-
 bot.infinity_polling()
