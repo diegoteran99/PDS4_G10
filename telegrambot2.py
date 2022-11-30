@@ -439,6 +439,8 @@ def check_answer_time(message):
     current_time = time.time()
     print("current_time: ", current_time)
     print("time_passed: ", round(current_time - initial_time,1))
+    print(message)
+
 
     if message.from_user.id not in trivia_time_points:
             trivia_time_points[message.from_user.id] = {
@@ -477,6 +479,7 @@ def check_answer_time(message):
                 row_width = 1, 
                 resize_keyboard=True)
             text = ""
+            #time.sleep(int(tiempo_juego) - (current_time - initial_time))
             for i in trivia_time_points:
                 text+="{} → {} points\n".format(trivia_time_points[i]["first_name"]+ " "+trivia_time_points[i]["last_name"],trivia_time_points[i]["points"])
             bot.send_message(message.chat.id, text)
